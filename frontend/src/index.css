@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --primary: #15803d;
+  --secondary: #166534;
+  --accent: #d97706;
+  --card-bg: #ffffff;
+}
+
+@layer base {
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--background);
+    color: var(--foreground);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+}
+
+/* KisanVridhi Practical Neutral Styling */
+.agri-bg {
+  background-color: #f8fafc;
+}
+
+.glass-card, .glass-card-interactive, .glass-panel, .glass-panel-premium {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+}
+
+/* Touch Targets for Mobile Usability (Min 44px) */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Mobile Safe Area Padding */
+.pb-safe {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+.mb-safe-nav {
+  padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f8fafc;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
