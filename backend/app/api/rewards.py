@@ -6,7 +6,7 @@ from typing import List, Optional
 from app.database.session import get_db
 from app.models import RewardItem, UserRewardRedemption, User, Notification
 from app.auth.dependencies import get_current_user
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 router = APIRouter(prefix="/rewards", tags=["Rewards & Prize Redemption Marketplace"])
 
@@ -21,8 +21,7 @@ class RewardResponse(BaseModel):
     inventory_count: int
     is_active: bool
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class RedemptionResponse(BaseModel):
     id: int

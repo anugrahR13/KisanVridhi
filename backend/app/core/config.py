@@ -1,6 +1,6 @@
 import os
 from typing import List
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "AI-Powered Gamified Platform for Personalized Sustainable Farming"
@@ -21,8 +21,7 @@ class Settings(BaseSettings):
     # AI settings
     AI_API_KEY: str = os.getenv("AI_API_KEY", "")
     
-    class Config:
-        case_sensitive = True
+    model_config = SettingsConfigDict(case_sensitive=True)
 
 settings = Settings()
 

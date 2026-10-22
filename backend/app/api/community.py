@@ -5,7 +5,7 @@ from app.database.session import get_db
 from app.models import CommunityPost, User
 from app.auth.dependencies import get_current_user
 from app.services.gamification_service import award_xp
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 router = APIRouter(prefix="/community", tags=["Community Knowledge Exchange"])
 
@@ -25,8 +25,7 @@ class PostResponse(BaseModel):
     upvotes: int
     created_at: str
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 @router.get("", response_model=List[PostResponse])
 def get_posts(db: Session = Depends(get_db)):

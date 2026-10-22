@@ -4,7 +4,7 @@ from typing import List
 from app.database.session import get_db
 from app.models import GovernmentAuction, User
 from app.auth.dependencies import get_current_user
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 router = APIRouter(prefix="/auctions", tags=["Government Auctions"])
 
@@ -19,8 +19,7 @@ class AuctionResponse(BaseModel):
     procurement_agency: str
     status: str
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 @router.get("", response_model=List[AuctionResponse])
 def get_auctions(db: Session = Depends(get_db)):

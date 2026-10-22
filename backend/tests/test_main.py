@@ -25,7 +25,7 @@ def setup_db():
     Base.metadata.create_all(bind=engine)
     db = TestingSessionLocal()
     # Ensure seed categories exist in test DB
-    from app.models import PracticeCategory, Mission
+    from app.models import PracticeCategory, Mission, GovernmentAuction, RewardItem
     if db.query(PracticeCategory).count() == 0:
         c1 = PracticeCategory(name="Water Conservation", slug="water-conservation", description="Water management", icon="Droplets")
         c2 = PracticeCategory(name="Soil Health", slug="soil-health", description="Soil carbon", icon="Sprout")
@@ -35,6 +35,31 @@ def setup_db():
         db.refresh(c1)
         m1 = Mission(title="Test Water Mission", description="Test mission", category_id=c1.id, xp_reward=100, requires_image=False)
         db.add(m1)
+        
+        auc = GovernmentAuction(
+            title="Kharif Wheat Procurement 2026",
+            crop_type="Wheat",
+            msp_price_per_quintal=2275.0,
+            min_sustainability_score_required=40.0,
+            location_region="Punjab",
+            deadline_date="2026-11-30",
+            procurement_agency="FCI",
+            status="Active"
+        )
+        db.add(auc)
+
+        rew = RewardItem(
+            title="Bio-Fertilizer Voucher",
+            description="50% off on organic compost",
+            category="Bio-Inputs",
+            points_cost=20,
+            sponsor_agency="ICAR",
+            image_icon="Gift",
+            inventory_count=10,
+            voucher_code_prefix="BIOFERT",
+            is_active=True
+        )
+        db.add(rew)
         db.commit()
     db.close()
     yield
@@ -308,4 +333,69 @@ def test_weather_schemes_and_market():
     # Market prices
     m_resp = client.get("/api/market/prices")
     assert m_resp.status_code == 200
+
+def test_disease_detection_community_and_rewards():
+    reg_payload = {
+        "email": "dd_farmer@example.com",
+        "password": "Password123",
+        "confirm_password": "Password123",
+        "full_name": "DD Farmer",
+        "location": "Punjab",
+        "preferred_language": "English"
+    }
+    res_reg = client.post("/api/auth/register", json=reg_payload)
+    token = res_reg.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # 1. Disease detection
+    res_diag = client.post("/api/disease-detection/analyze", data={"crop_name": "Tomato"}, headers=headers)
+    assert res_diag.status_code == 200
+    diag_data = res_diag.json()
+    assert "disease_name" in diag_data
+    assert "organic_treatment" in diag_data
+    assert "chemical_treatment" in diag_data
+
+    # History
+    res_hist = client.get("/api/disease-detection/history", headers=headers)
+    assert res_hist.status_code == 200
+    assert len(res_hist.json()) >= 1
+
+    # 2. Community
+    res_posts = client.get("/api/community")
+    assert res_posts.status_code == 200
+    post_res = client.post("/api/community", json={
+        "title": "Natural Pest Control with Neem Oil",
+        "content": "Using neem oil 10000 ppm diluted in soap water controls aphids effectively.",
+        "category": "Organic Farming"
+    }, headers=headers)
+    assert post_res.status_code == 200
+    p_id = post_res.json()["id"]
+
+    up_res = client.post(f"/api/community/{p_id}/upvote", headers=headers)
+    assert up_res.status_code == 200
+
+    # 3. Auctions
+    auctions = client.get("/api/auctions")
+    assert auctions.status_code == 200
+    if len(auctions.json()) > 0:
+        auc_id = auctions.json()[0]["id"]
+        res_apply = client.post(f"/api/auctions/apply/{auc_id}", headers=headers)
+        assert res_apply.status_code == 200
+
+    # 4. Rewards
+    rewards = client.get("/api/rewards")
+    assert rewards.status_code == 200
+    if len(rewards.json()) > 0:
+        rew_id = rewards.json()[0]["id"]
+        # Farmer earned 30 XP from disease diagnosis + 25 XP from community post = 55 XP > 20 XP cost
+        redeem_res = client.post(f"/api/rewards/redeem/{rew_id}", headers=headers)
+        assert redeem_res.status_code == 200
+        assert "voucher_code" in redeem_res.json()
+
+    # 5. Dashboard Stats & Analytics
+    stats_res = client.get("/api/dashboard/stats", headers=headers)
+    assert stats_res.status_code == 200
+    analytics_res = client.get("/api/dashboard/analytics", headers=headers)
+    assert analytics_res.status_code == 200
+
 

@@ -7,7 +7,7 @@ from app.database.session import get_db
 from app.models import DiseaseDiagnosis, User, Farm
 from app.auth.dependencies import get_current_user
 from app.services.gamification_service import award_xp
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 router = APIRouter(prefix="/disease-detection", tags=["AI Crop Health & Disease Diagnostic Engine"])
 
@@ -25,8 +25,7 @@ class DiagnosisResponse(BaseModel):
     expert_escalation_required: bool = False
     uncertainty_warning: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 # Standard Crop Disease Knowledge Matrix
 DISEASE_KNOWLEDGE_BASE = [
@@ -132,10 +131,20 @@ async def analyze_crop_health(
 
     award_xp(current_user.id, 30, "crop_analysis", f"AI Crop Diagnosis: {selected['disease']}", db)
 
-    resp_dict = diag.__dict__.copy()
-    resp_dict["expert_escalation_required"] = escalation_required
-    resp_dict["uncertainty_warning"] = uncertainty_warning
-    return resp_dict
+    return DiagnosisResponse(
+        id=diag.id,
+        crop_detected=diag.crop_detected,
+        disease_name=diag.disease_name,
+        confidence_score=diag.confidence_score,
+        severity=diag.severity,
+        organic_treatment=diag.organic_treatment,
+        chemical_treatment=diag.chemical_treatment,
+        preventive_measure=diag.preventive_measure,
+        recommended_quest=diag.recommended_quest,
+        image_url=diag.image_url,
+        expert_escalation_required=escalation_required,
+        uncertainty_warning=uncertainty_warning
+    )
 
 @router.get("/history", response_model=list[DiagnosisResponse])
 def get_diagnosis_history(
