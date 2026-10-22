@@ -35,6 +35,13 @@ from app.api.market import router as market_router
 # Create database tables automatically
 Base.metadata.create_all(bind=engine)
 
+# Auto-seed initial demo accounts, missions, and schemes if database is fresh
+try:
+    from app.database.seed import seed_database
+    seed_database()
+except Exception as e:
+    print(f"[STARTUP] Seed check: {e}")
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
@@ -81,6 +88,8 @@ app.include_router(documents_router, prefix=settings.API_V1_STR)
 app.include_router(market_router, prefix=settings.API_V1_STR)
 
 @app.get("/")
+@app.get("/api")
+@app.get("/api/")
 def root():
     return {
         "status": "online",

@@ -17,7 +17,7 @@ export const LoginPage: React.FC = () => {
 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, loginAsDemo } = useAuth();
   const navigate = useNavigate();
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
@@ -29,7 +29,11 @@ export const LoginPage: React.FC = () => {
       await login(email, password);
       navigate('/dashboard');
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Invalid email or password.');
+      if (!err.response) {
+        setError('Cannot connect to backend API server. If your backend is not yet deployed, use the 1-Click Demo Login below to explore the full platform.');
+      } else {
+        setError(err.response?.data?.detail || 'Invalid email or password.');
+      }
     } finally {
       setLoading(false);
     }
@@ -207,14 +211,42 @@ export const LoginPage: React.FC = () => {
           </div>
         )}
 
-        <div className="pt-2 text-center space-y-2 border-t border-slate-100">
+        <div className="pt-2 text-center space-y-3 border-t border-slate-100">
+          <div className="space-y-1.5">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Instant Live Preview</span>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  loginAsDemo('farmer');
+                  navigate('/dashboard');
+                }}
+                className="py-2 px-3 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <Sprout className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Demo Farmer</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  loginAsDemo('admin');
+                  navigate('/admin/dashboard');
+                }}
+                className="py-2 px-3 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-300 text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <KeyRound className="w-3.5 h-3.5 text-purple-600" />
+                <span>Demo Admin</span>
+              </button>
+            </div>
+          </div>
+
           <p className="text-xs text-slate-600 font-medium">
             Don't have a farmer account yet?{' '}
             <Link to="/register" className="font-bold text-green-800 hover:underline">
               Register Here
             </Link>
           </p>
-          <div className="p-2.5 rounded bg-slate-50 border border-slate-200 text-[11px] text-slate-600 font-medium space-y-0.5">
+          <div className="p-2.5 rounded bg-slate-50 border border-slate-200 text-[11px] text-slate-600 font-medium space-y-0.5 text-left">
             <p><strong>Demo Farmer:</strong> farmer@eco.farm / Farmer@123456</p>
             <p><strong>Demo Admin:</strong> admin@eco.farm / Admin@123456</p>
           </div>

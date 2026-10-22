@@ -46,3 +46,5 @@ htmlcov/
 .system_generated/
 scratch/
 *.log
+.vercel
+.env*

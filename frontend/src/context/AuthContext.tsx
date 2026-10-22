@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types';
 import { authService } from '../services/appServices';
+import { DEMO_FARMER_USER, DEMO_ADMIN_USER } from '../services/demoData';
 
 interface AuthContextType {
   user: User | null;
@@ -10,6 +11,7 @@ interface AuthContextType {
   isAdmin: boolean;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  loginAsDemo: (demoRole: 'farmer' | 'admin') => void;
   register: (data: any) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
@@ -24,6 +26,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchCurrentUser = async () => {
     try {
+      if (localStorage.getItem('is_demo') === 'true') {
+        const cachedUser = localStorage.getItem('user');
+        if (cachedUser) {
+          setUser(JSON.parse(cachedUser));
+        } else {
+          setUser(DEMO_FARMER_USER);
+        }
+        return;
+      }
       if (localStorage.getItem('token')) {
         const userData = await authService.getMe();
         setUser(userData);
@@ -44,13 +55,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string) => {
     const data = await authService.login(email, password);
+    localStorage.removeItem('is_demo');
     localStorage.setItem('token', data.access_token);
     setToken(data.access_token);
     await fetchCurrentUser();
   };
 
+  const loginAsDemo = (demoRole: 'farmer' | 'admin') => {
+    const selectedUser = demoRole === 'admin' ? DEMO_ADMIN_USER : DEMO_FARMER_USER;
+    localStorage.setItem('token', 'demo-token');
+    localStorage.setItem('is_demo', 'true');
+    localStorage.setItem('user', JSON.stringify(selectedUser));
+    setToken('demo-token');
+    setUser(selectedUser);
+  };
+
   const register = async (regData: any) => {
     const data = await authService.register(regData);
+    localStorage.removeItem('is_demo');
     localStorage.setItem('token', data.access_token);
     setToken(data.access_token);
     await fetchCurrentUser();
@@ -59,6 +81,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('is_demo');
     setToken(null);
     setUser(null);
   };
@@ -80,6 +103,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isAdmin,
       loading,
       login,
+      loginAsDemo,
       register,
       logout,
       refreshUser

@@ -6,6 +6,12 @@ import {
   GovernmentAuction, CommunityPost, DiseaseDiagnosis, CropTracking, HelpDeskTicket,
   RewardItem, UserRewardRedemption
 } from '../types';
+import { 
+  DEMO_STATS, DEMO_FARMS, DEMO_WEATHER, DEMO_TASKS, 
+  DEMO_MISSIONS, DEMO_BADGES, DEMO_LEADERBOARD 
+} from './demoData';
+
+const isDemo = () => localStorage.getItem('is_demo') === 'true';
 
 export const authService = {
   login: async (email: string, password: string) => {
@@ -91,9 +97,15 @@ export const soilService = {
 
 export const taskService = {
   getTasks: async (statusFilter?: string) => {
-    const params = statusFilter ? { status_filter: statusFilter } : {};
-    const res = await api.get('/tasks', { params });
-    return res.data;
+    if (isDemo()) return DEMO_TASKS;
+    try {
+      const params = statusFilter ? { status_filter: statusFilter } : {};
+      const res = await api.get('/tasks', { params });
+      return res.data;
+    } catch (err: any) {
+      if (!err.response) return DEMO_TASKS;
+      throw err;
+    }
   },
   createTask: async (taskData: any) => {
     const res = await api.post('/tasks', taskData);
@@ -115,11 +127,17 @@ export const taskService = {
 
 export const weatherService = {
   getWeather: async (location?: string, farmId?: number) => {
-    const params: any = {};
-    if (location) params.location = location;
-    if (farmId) params.farm_id = farmId;
-    const res = await api.get('/weather', { params });
-    return res.data;
+    if (isDemo()) return DEMO_WEATHER;
+    try {
+      const params: any = {};
+      if (location) params.location = location;
+      if (farmId) params.farm_id = farmId;
+      const res = await api.get('/weather', { params });
+      return res.data;
+    } catch (err: any) {
+      if (!err.response) return DEMO_WEATHER;
+      throw err;
+    }
   }
 };
 
@@ -180,12 +198,24 @@ export const marketService = {
 
 export const farmService = {
   getFarms: async (): Promise<Farm[]> => {
-    const res = await api.get('/farms');
-    return res.data;
+    if (isDemo()) return DEMO_FARMS;
+    try {
+      const res = await api.get('/farms');
+      return res.data;
+    } catch (err: any) {
+      if (!err.response) return DEMO_FARMS;
+      throw err;
+    }
   },
   getFarm: async (id: number): Promise<Farm> => {
-    const res = await api.get(`/farms/${id}`);
-    return res.data;
+    if (isDemo()) return DEMO_FARMS[0];
+    try {
+      const res = await api.get(`/farms/${id}`);
+      return res.data;
+    } catch (err: any) {
+      if (!err.response) return DEMO_FARMS[0];
+      throw err;
+    }
   },
   createFarm: async (farmData: any): Promise<Farm> => {
     const res = await api.post('/farms', farmData);
@@ -207,8 +237,14 @@ export const farmService = {
 
 export const recommendationService = {
   getRecommendations: async (): Promise<Recommendation[]> => {
-    const res = await api.get('/recommendations');
-    return res.data;
+    if (isDemo()) return DEMO_STATS.recent_recommendations;
+    try {
+      const res = await api.get('/recommendations');
+      return res.data;
+    } catch (err: any) {
+      if (!err.response) return DEMO_STATS.recent_recommendations;
+      throw err;
+    }
   },
   generateRecommendations: async (farmId: number): Promise<Recommendation[]> => {
     const res = await api.post(`/recommendations/generate?farm_id=${farmId}`);
@@ -218,15 +254,27 @@ export const recommendationService = {
 
 export const missionService = {
   getMissions: async (category_id?: number, difficulty?: string): Promise<Mission[]> => {
-    const params: any = {};
-    if (category_id) params.category_id = category_id;
-    if (difficulty) params.difficulty = difficulty;
-    const res = await api.get('/missions', { params });
-    return res.data;
+    if (isDemo()) return DEMO_MISSIONS;
+    try {
+      const params: any = {};
+      if (category_id) params.category_id = category_id;
+      if (difficulty) params.difficulty = difficulty;
+      const res = await api.get('/missions', { params });
+      return res.data;
+    } catch (err: any) {
+      if (!err.response) return DEMO_MISSIONS;
+      throw err;
+    }
   },
   getMyProgress: async (): Promise<MissionProgress[]> => {
-    const res = await api.get('/missions/my-progress');
-    return res.data;
+    if (isDemo()) return [];
+    try {
+      const res = await api.get('/missions/my-progress');
+      return res.data;
+    } catch (err: any) {
+      if (!err.response) return [];
+      throw err;
+    }
   },
   startMission: async (missionId: number, farmId?: number): Promise<MissionProgress> => {
     const params = farmId ? `?farm_id=${farmId}` : '';
@@ -256,25 +304,57 @@ export const verificationService = {
 
 export const gamificationService = {
   getBadges: async (): Promise<Badge[]> => {
-    const res = await api.get('/badges');
-    return res.data;
+    if (isDemo()) return DEMO_BADGES;
+    try {
+      const res = await api.get('/badges');
+      return res.data;
+    } catch (err: any) {
+      if (!err.response) return DEMO_BADGES;
+      throw err;
+    }
   },
   getUserBadges: async (): Promise<UserBadge[]> => {
-    const res = await api.get('/users/me/badges');
-    return res.data;
+    if (isDemo()) return DEMO_BADGES.slice(0, 2).map((b, i) => ({ id: i + 1, badge: b, awarded_at: '2026-08-15' }));
+    try {
+      const res = await api.get('/users/me/badges');
+      return res.data;
+    } catch (err: any) {
+      if (!err.response) return DEMO_BADGES.slice(0, 2).map((b, i) => ({ id: i + 1, badge: b, awarded_at: '2026-08-15' }));
+      throw err;
+    }
   },
   getLeaderboard: async (): Promise<LeaderboardEntry[]> => {
-    const res = await api.get('/leaderboard');
-    return res.data;
+    if (isDemo()) return DEMO_LEADERBOARD;
+    try {
+      const res = await api.get('/leaderboard');
+      return res.data;
+    } catch (err: any) {
+      if (!err.response) return DEMO_LEADERBOARD;
+      throw err;
+    }
   },
   getNotifications: async () => {
-    const res = await api.get('/notifications');
-    return res.data;
+    if (isDemo()) return [];
+    try {
+      const res = await api.get('/notifications');
+      return res.data;
+    } catch (err: any) {
+      if (!err.response) return [];
+      throw err;
+    }
   }
 };
 
 export const assistantService = {
   chat: async (message: string, farmId?: number) => {
+    if (isDemo()) {
+      return {
+        answer: `[Demo Mode Advisory] Based on your farm in Ludhiana with Loamy soil and Wheat crop: We recommend maintaining drip irrigation intervals and top-dressing with organic mulching to conserve moisture.`,
+        sources: [
+          { title: "ICAR Crop Management Guide 2026", source: "ICAR", snippet: "Organic mulching saves 25% soil moisture." }
+        ]
+      };
+    }
     const res = await api.post('/assistant/chat', { message, farm_id: farmId });
     return res.data;
   }
@@ -282,10 +362,30 @@ export const assistantService = {
 
 export const dashboardService = {
   getStats: async (): Promise<FarmerDashboardStats> => {
-    const res = await api.get('/dashboard/stats');
-    return res.data;
+    if (isDemo()) return DEMO_STATS;
+    try {
+      const res = await api.get('/dashboard/stats');
+      return res.data;
+    } catch (err: any) {
+      if (!err.response) return DEMO_STATS;
+      throw err;
+    }
   },
   getAnalytics: async () => {
+    if (isDemo()) {
+      return {
+        score_history: [
+          { date: 'Oct 01', overall: 65, water: 70, soil: 62, waste: 60, diversity: 68, resource: 65 },
+          { date: 'Oct 10', overall: 70, water: 76, soil: 68, waste: 65, diversity: 72, resource: 70 },
+          { date: 'Oct 20', overall: 76, water: 82, soil: 74, waste: 70, diversity: 78, resource: 76 }
+        ],
+        xp_history: [
+          { date: 'Oct 17', description: 'Community Contribution', amount: 25 },
+          { date: 'Oct 18', description: 'AI Crop Diagnosis', amount: 30 },
+          { date: 'Oct 19', description: 'Completed Mission: Zero Stubble Burning', amount: 160 }
+        ]
+      };
+    }
     const res = await api.get('/dashboard/analytics');
     return res.data;
   }
