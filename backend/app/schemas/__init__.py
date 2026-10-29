@@ -6,9 +6,9 @@ from datetime import datetime
 class UserRegister(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=6)
-    confirm_password: str
+    confirm_password: Optional[str] = None
     full_name: str
-    location: str
+    location: Optional[str] = "India"
     phone_number: Optional[str] = None
     preferred_language: Optional[str] = "English"
 

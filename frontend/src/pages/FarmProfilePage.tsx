@@ -74,7 +74,11 @@ export const FarmProfilePage: React.FC = () => {
       }
       await fetchFarms();
     } catch (err: any) {
-      setErrorMsg(err.response?.data?.detail || 'Error saving farm profile.');
+      if (!err.response) {
+        setErrorMsg('Cannot reach backend server. Please verify the backend is running at http://localhost:8000.');
+      } else {
+        setErrorMsg(err.response?.data?.detail || 'Error saving farm profile.');
+      }
     }
   };
 

@@ -11,7 +11,7 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 @router.post("/register", response_model=Token, status_code=status.HTTP_201_CREATED)
 def register_user(user_in: UserRegister, db: Session = Depends(get_db)):
-    if user_in.password != user_in.confirm_password:
+    if user_in.confirm_password and user_in.password != user_in.confirm_password:
         raise HTTPException(status_code=400, detail="Passwords do not match.")
 
     existing_user = db.query(User).filter(User.email == user_in.email).first()
@@ -25,7 +25,8 @@ def register_user(user_in: UserRegister, db: Session = Depends(get_db)):
         password_hash=get_password_hash(user_in.password),
         full_name=user_in.full_name,
         display_name=display_name,
-        location=user_in.location,
+        location=user_in.location or "Punjab, India",
+        phone_number=user_in.phone_number,
         preferred_language=user_in.preferred_language or "English",
         role="farmer",
         xp=0,

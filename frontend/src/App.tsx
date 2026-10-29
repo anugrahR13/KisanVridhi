@@ -28,6 +28,7 @@ import { RewardsMarketplacePage } from './pages/RewardsMarketplacePage';
 // Human-Designed Decision Support Modules
 import { ExpensesProfitabilityPage } from './pages/ExpensesProfitabilityPage';
 import { SoilHealthPage } from './pages/SoilHealthPage';
+import { FertilizerCalculatorPage } from './pages/FertilizerCalculatorPage';
 import { WeatherIrrigationPage } from './pages/WeatherIrrigationPage';
 import { TasksPage } from './pages/TasksPage';
 import { GovernmentSchemesPage } from './pages/GovernmentSchemesPage';
@@ -76,6 +77,7 @@ export const App: React.FC = () => {
               <Route path="weather-irrigation" element={<ProtectedRoute><WeatherIrrigationPage /></ProtectedRoute>} />
               <Route path="expenses" element={<ProtectedRoute><ExpensesProfitabilityPage /></ProtectedRoute>} />
               <Route path="soil" element={<ProtectedRoute><SoilHealthPage /></ProtectedRoute>} />
+              <Route path="fertilizer-calculator" element={<ProtectedRoute><FertilizerCalculatorPage /></ProtectedRoute>} />
               <Route path="schemes" element={<ProtectedRoute><GovernmentSchemesPage /></ProtectedRoute>} />
               <Route path="documents" element={<ProtectedRoute><DocumentVaultPage /></ProtectedRoute>} />
 

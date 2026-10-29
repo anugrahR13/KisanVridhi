@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { 
   Home, Tractor, Sprout, Sparkles, CheckCircle2, DollarSign, 
   Store, Bot, ShieldCheck, CheckSquare, Layers, Landmark, FileText,
-  Users, Target, Gift, Trophy, LineChart, HelpCircle
+  Users, Target, Gift, Trophy, LineChart, HelpCircle, Calculator
 } from 'lucide-react';
 
 export const DesktopSidebar: React.FC = () => {
@@ -15,6 +15,7 @@ export const DesktopSidebar: React.FC = () => {
     { to: '/dashboard', label: 'Home', icon: Home },
     { to: '/farm-profile', label: 'My Farm', icon: Tractor },
     { to: '/disease-detection', label: 'Crop Health', icon: Sprout },
+    { to: '/fertilizer-calculator', label: 'Fertilizer Optimizer', icon: Calculator },
     { to: '/recommendations', label: 'Recommendations', icon: Sparkles },
     { to: '/tasks', label: 'Tasks', icon: CheckCircle2 },
     { to: '/expenses', label: 'Expenses', icon: DollarSign },

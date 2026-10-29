@@ -1,6 +1,12 @@
+from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 from app.database.session import SessionLocal, engine, Base
-from app.models import User, Farm, Crop, PracticeCategory, Mission, Badge, Recommendation, MissionProgress, XPTransaction, UserBadge, ImageVerification, GovernmentAuction, CommunityPost, RewardItem, UserRewardRedemption, GovernmentScheme, MarketPrice
+from app.models import (
+    User, Farm, Crop, PracticeCategory, Mission, Badge, Recommendation, 
+    MissionProgress, XPTransaction, UserBadge, ImageVerification, GovernmentAuction, 
+    CommunityPost, RewardItem, UserRewardRedemption, GovernmentScheme, MarketPrice,
+    FarmDocument, DiseaseDiagnosis, FarmExpense, ProfitRecord, SoilRecord, FarmTask
+)
 from app.auth.security import get_password_hash
 from app.services.sustainability_calculator import calculate_sustainability_score
 from app.services.gamification_service import award_xp
@@ -304,14 +310,118 @@ def seed_database():
                 # Seed Farm Tasks
                 if db.query(FarmTask).filter(FarmTask.user_id == demo_farmer.id).count() == 0:
                     tasks_data = [
-                        FarmTask(user_id=demo_farmer.id, farm_id=demo_farm.id, title="Inspect Wheat Crop for Yellow Rust", description="Walk through 3.5 acre wheat field and check underside of lower leaves.", category="Pest Control", due_date="2026-08-17", priority="high", status="pending", source="AI System"),
-                        FarmTask(user_id=demo_farmer.id, farm_id=demo_farm.id, title="Flush Drip Irrigation Laterals", description="Open end-caps of drip lateral lines and run pump at 2 bar pressure to remove silt.", category="Irrigation", due_date="2026-08-18", priority="medium", status="pending", source="Manual"),
-                        FarmTask(user_id=demo_farmer.id, farm_id=demo_farm.id, title="Apply Fermented Jeevamrut Liquid", description="Apply 200L Jeevamrut solution via drip venturi injector during evening watering.", category="Organic Farming", due_date="2026-08-20", priority="medium", status="pending", source="Recommendation"),
+                        FarmTask(user_id=demo_farmer.id, farm_id=demo_farm.id, title="Inspect Wheat Crop for Yellow Rust", description="Walk through 3.5 acre wheat field and check underside of lower leaves with AI Grad-CAM.", category="Pest Control", due_date="2026-11-02", priority="high", status="pending", source="AI System"),
+                        FarmTask(user_id=demo_farmer.id, farm_id=demo_farm.id, title="Flush Drip Irrigation Laterals", description="Open end-caps of drip lateral lines and run pump at 2 bar pressure to remove silt.", category="Irrigation", due_date="2026-11-04", priority="medium", status="pending", source="Manual"),
+                        FarmTask(user_id=demo_farmer.id, farm_id=demo_farm.id, title="Apply Fermented Jeevamrut Liquid", description="Apply 200L Jeevamrut solution via drip venturi injector during evening watering.", category="Organic Farming", due_date="2026-11-06", priority="medium", status="pending", source="Recommendation"),
+                        FarmTask(user_id=demo_farmer.id, farm_id=demo_farm.id, title="Check NPK Fertilizer Split (Tillering Stage)", description="Broadcast 2nd split Urea dose (1.2 bags) before scheduled light irrigation.", category="Soil Health", due_date="2026-11-10", priority="high", status="pending", source="Optimizer"),
+                        FarmTask(user_id=demo_farmer.id, farm_id=demo_farm.id, title="Install Yellow Sticky Traps in Mustard Patch", description="Placed 10 yellow traps per acre for aphid biological control.", category="Pest Control", due_date="2026-10-25", priority="medium", status="completed", source="Mission"),
+                        FarmTask(user_id=demo_farmer.id, farm_id=demo_farm.id, title="Baseline Soil Health Lab Testing", description="Collected 5 composite core samples and submitted to district KVK laboratory.", category="Soil Health", due_date="2026-07-18", priority="high", status="completed", source="Manual")
                     ]
                     for t in tasks_data:
                         db.add(t)
                     db.commit()
                     print("[SUCCESS] Demo Farm Tasks seeded!")
+
+                # Seed Extra Active Crop
+                if db.query(Crop).filter(Crop.farm_id == demo_farm.id, Crop.crop_name == "Tomato").count() == 0:
+                    db.add(Crop(farm_id=demo_farm.id, crop_name="Tomato", variety="Himsona", area_acres=0.5, status="active"))
+                    db.commit()
+
+                # Seed Farm Documents
+                if db.query(FarmDocument).filter(FarmDocument.user_id == demo_farmer.id).count() == 0:
+                    docs_data = [
+                        FarmDocument(user_id=demo_farmer.id, farm_id=demo_farm.id, title="Official District KVK Soil Health Card 2026", category="Soil Report", file_path="/uploads/documents/soil_health_card_2026.pdf", file_type="application/pdf", file_size_bytes=245000),
+                        FarmDocument(user_id=demo_farmer.id, farm_id=demo_farm.id, title="PMKSY Drip Irrigation Subsidy Sanction Certificate", category="Scheme Doc", file_path="/uploads/documents/pmksy_drip_subsidy.pdf", file_type="application/pdf", file_size_bytes=412000),
+                        FarmDocument(user_id=demo_farmer.id, farm_id=demo_farm.id, title="Certified HD-2967 Organic Wheat Seed Purchase Bill", category="Bill/Receipt", file_path="/uploads/documents/seed_invoice_hd2967.pdf", file_type="application/pdf", file_size_bytes=185000),
+                        FarmDocument(user_id=demo_farmer.id, farm_id=demo_farm.id, title="Kisan Credit Card (KCC) Land Record 7/12 Attestation", category="Other", file_path="/uploads/documents/kcc_land_record_attestation.pdf", file_type="application/pdf", file_size_bytes=320000)
+                    ]
+                    for doc in docs_data:
+                        db.add(doc)
+                    db.commit()
+                    print("[SUCCESS] Demo Farm Documents seeded!")
+
+                # Seed Disease Diagnosis with Grad-CAM Saliency Record
+                if db.query(DiseaseDiagnosis).filter(DiseaseDiagnosis.user_id == demo_farmer.id).count() == 0:
+                    diag = DiseaseDiagnosis(
+                        user_id=demo_farmer.id,
+                        farm_id=demo_farm.id,
+                        crop_detected="Wheat",
+                        disease_name="Wheat Yellow Rust (Puccinia striiformis)",
+                        confidence_score=0.942,
+                        severity="Moderate",
+                        organic_treatment="Spray 5% Neem Seed Kernel Extract (NSKE) or fermented sour buttermilk (1:10 ratio) every 7 days.",
+                        chemical_treatment="Propiconazole 25% EC @ 1ml/L water or Tebuconazole 25.9% EC @ 1ml/L water.",
+                        preventive_measure="Adopt early sowing, avoid excess nitrogen fertilizer, use resistant varieties like HD-3086 or PBW-725.",
+                        recommended_quest="Implement Organic Foliar Spray Quest",
+                        image_url="https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=600&q=80"
+                    )
+                    db.add(diag)
+                    db.commit()
+                    print("[SUCCESS] Demo Disease Diagnosis seeded!")
+
+                # Seed Awarded Badges for Farmer
+                if db.query(UserBadge).filter(UserBadge.user_id == demo_farmer.id).count() == 0:
+                    all_badges = db.query(Badge).all()
+                    for b in all_badges[:4]:
+                        db.add(UserBadge(user_id=demo_farmer.id, badge_id=b.id))
+                    db.commit()
+                    print("[SUCCESS] Demo Farmer Badges awarded!")
+
+                # Seed Mission Progress & Approved Image Verification
+                if db.query(MissionProgress).filter(MissionProgress.user_id == demo_farmer.id).count() == 0:
+                    all_missions = db.query(Mission).all()
+                    if len(all_missions) >= 2:
+                        mp1 = MissionProgress(
+                            user_id=demo_farmer.id,
+                            farm_id=demo_farm.id,
+                            mission_id=all_missions[0].id,
+                            status="completed",
+                            image_url="https://images.unsplash.com/photo-1592417817098-8f3d6910985c?auto=format&fit=crop&w=600&q=80",
+                            started_at=datetime.utcnow() - timedelta(days=12),
+                            completed_at=datetime.utcnow() - timedelta(days=5)
+                        )
+                        db.add(mp1)
+                        db.commit()
+                        db.refresh(mp1)
+
+                        v1 = ImageVerification(
+                            mission_progress_id=mp1.id,
+                            user_id=demo_farmer.id,
+                            image_path="https://images.unsplash.com/photo-1592417817098-8f3d6910985c?auto=format&fit=crop&w=600&q=80",
+                            verification_status="approved",
+                            detected_practice=all_missions[0].expected_practice_label or "Drip Irrigation Installation",
+                            confidence_score=0.965,
+                            review_notes="Verified by District Agriculture Officer. Drip system properly installed with filter unit."
+                        )
+                        db.add(v1)
+
+                        mp2 = MissionProgress(
+                            user_id=demo_farmer.id,
+                            farm_id=demo_farm.id,
+                            mission_id=all_missions[1].id,
+                            status="started",
+                            image_url=None,
+                            started_at=datetime.utcnow() - timedelta(days=2)
+                        )
+                        db.add(mp2)
+                        db.commit()
+                        print("[SUCCESS] Demo Mission Progress & Verification seeded!")
+
+                # Seed Reward Redemption
+                if db.query(UserRewardRedemption).filter(UserRewardRedemption.user_id == demo_farmer.id).count() == 0:
+                    reward = db.query(RewardItem).first()
+                    if reward:
+                        redemption = UserRewardRedemption(
+                            user_id=demo_farmer.id,
+                            reward_id=reward.id,
+                            voucher_code="SEED500-ECO9824",
+                            points_spent=reward.points_cost,
+                            status="Active",
+                            redeemed_at=datetime.utcnow() - timedelta(days=3)
+                        )
+                        db.add(redemption)
+                        db.commit()
+                        print("[SUCCESS] Demo Reward Redemption seeded!")
 
         # Seed Government Auctions & Community Posts
         if db.query(GovernmentAuction).count() == 0:

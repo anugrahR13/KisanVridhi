@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   CloudSun, Droplet, Sprout, AlertTriangle, CheckCircle2, 
-  ArrowRight, ShieldCheck, Tractor, DollarSign, Target, Plus, RefreshCw, AlertCircle
+  ArrowRight, ShieldCheck, Tractor, DollarSign, Target, Plus, RefreshCw, AlertCircle, Mic
 } from 'lucide-react';
 import { dashboardService, weatherService, taskService, farmService } from '../services/appServices';
 import { FarmerDashboardStats, WeatherData, FarmTask, Farm } from '../types';
+import { VoiceAssistantModal } from '../components/voice/VoiceAssistantModal';
 
 export const FarmerDashboard: React.FC = () => {
   const [stats, setStats] = useState<FarmerDashboardStats | null>(null);
@@ -14,6 +15,7 @@ export const FarmerDashboard: React.FC = () => {
   const [farms, setFarms] = useState<Farm[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [voiceAssistantOpen, setVoiceAssistantOpen] = useState(false);
 
   const loadDashboardData = async () => {
     setLoading(true);
@@ -99,7 +101,16 @@ export const FarmerDashboard: React.FC = () => {
             Welcome back, <span className="font-semibold text-slate-900">{stats.user.full_name}</span>. Here is your farm status for today.
           </p>
         </div>
-        <div className="mt-3 sm:mt-0 flex items-center space-x-2">
+        <div className="mt-3 sm:mt-0 flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setVoiceAssistantOpen(true)}
+            className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold rounded-md shadow-xs transition-colors flex items-center gap-1.5 animate-pulse"
+            title="बोलकर कृषि सलाह लें (Hindi, Punjabi, Telugu, Marathi, English)"
+          >
+            <Mic className="w-3.5 h-3.5 text-emerald-700" />
+            <span>🎙️ किसान आवाज़ (Voice)</span>
+          </button>
           <Link
             to="/farm-profile"
             className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold rounded-md border border-slate-200 transition-colors flex items-center gap-1.5"
@@ -381,6 +392,30 @@ export const FarmerDashboard: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Floating Vernacular Voice Advisor FAB */}
+      <div className="fixed bottom-20 md:bottom-8 right-6 z-40 flex flex-col items-end">
+        <button
+          onClick={() => setVoiceAssistantOpen(true)}
+          className="group relative flex items-center gap-2.5 px-4 py-3 bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-500 hover:to-green-600 text-white font-bold text-xs rounded-full shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 active:scale-95 border-2 border-emerald-400"
+          aria-label="Open Voice Advisory"
+        >
+          <span className="absolute -top-1 -right-1 flex h-3 w-3">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-300 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-400"></span>
+          </span>
+          <div className="p-1 rounded-full bg-white/20">
+            <Mic className="w-4 h-4 text-white" />
+          </div>
+          <span className="tracking-wide">किसान आवाज़ • Voice Advisor</span>
+        </button>
+      </div>
+
+      {/* Multilingual Voice Assistant Modal */}
+      <VoiceAssistantModal
+        isOpen={voiceAssistantOpen}
+        onClose={() => setVoiceAssistantOpen(false)}
+      />
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { TestTube, Plus, Lightbulb, CheckCircle2, ShieldCheck, AlertCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { TestTube, Plus, Lightbulb, CheckCircle2, ShieldCheck, AlertCircle, Calculator, ArrowRight } from 'lucide-react';
 import { soilService, farmService } from '../services/appServices';
 import { SoilRecord, Farm } from '../types';
 
@@ -114,6 +115,33 @@ export const SoilHealthPage: React.FC = () => {
             </select>
           </div>
         )}
+      </div>
+
+      {/* Precision Fertilizer Optimizer Banner */}
+      <div className="bg-gradient-to-r from-emerald-800 to-green-900 text-white rounded-lg p-4 sm:p-5 shadow-sm border border-emerald-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="p-1 rounded bg-emerald-500/20 text-emerald-300">
+              <Calculator className="w-4 h-4" />
+            </span>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-300">
+              New: Smart DAP-Urea Dosage Optimizer
+            </span>
+          </div>
+          <h2 className="text-base font-bold text-white">
+            Calculate Precision Fertilizer Bags From Your Soil Test
+          </h2>
+          <p className="text-xs text-emerald-100/80 max-w-2xl">
+            Input or auto-load your soil N-P-K metrics to compute exact DAP (50kg), Urea (45kg), and MOP bags without Nitrogen double-counting.
+          </p>
+        </div>
+        <Link
+          to="/fertilizer-calculator"
+          className="px-4 py-2 bg-white text-emerald-900 hover:bg-emerald-50 text-xs font-bold rounded-md shadow-xs transition-colors flex items-center gap-1.5 shrink-0 self-start sm:self-center"
+        >
+          <span>Open Optimizer</span>
+          <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
       </div>
 
       {/* Main Grid */}

@@ -227,6 +227,9 @@ export interface DiseaseDiagnosis {
   preventive_measure: string;
   recommended_quest?: string;
   image_url?: string;
+  heatmap_url?: string;
+  lesion_coverage_pct?: number;
+  saliency_features?: string[];
   expert_escalation_required?: boolean;
   uncertainty_warning?: string;
 }
@@ -397,4 +400,65 @@ export interface MarketPrice {
   source: string;
   updated_at?: string;
 }
+
+export interface FertilizerRequest {
+  crop_name: string;
+  area_acres: number;
+  farm_id?: number;
+  soil_ph?: number;
+  nitrogen_ppm?: number;
+  phosphorus_ppm?: number;
+  potassium_ppm?: number;
+  organic_carbon_pct?: number;
+  target_yield_qtl?: number;
+  farmyard_manure_applied?: boolean;
+}
+
+export interface NutrientRequirement {
+  n_kg_per_acre: number;
+  p2o5_kg_per_acre: number;
+  k2o_kg_per_acre: number;
+  total_n_kg: number;
+  total_p2o5_kg: number;
+  total_k2o_kg: number;
+}
+
+export interface CommercialBags {
+  dap_bags: number;
+  urea_bags: number;
+  mop_bags: number;
+  dap_weight_kg: number;
+  urea_weight_kg: number;
+  mop_weight_kg: number;
+  estimated_cost_inr: number;
+  customary_cost_inr: number;
+  estimated_savings_inr: number;
+}
+
+export interface ApplicationStage {
+  stage_name: string;
+  timing: string;
+  dap_bags: number;
+  urea_bags: number;
+  mop_bags: number;
+  instructions: string;
+}
+
+export interface OrganicAlternative {
+  item_name: string;
+  dosage: string;
+  benefit: string;
+}
+
+export interface FertilizerOptimizationResponse {
+  crop_name: string;
+  area_acres: number;
+  soil_status: Record<string, string>;
+  nutrient_requirements: NutrientRequirement;
+  commercial_bags: CommercialBags;
+  application_schedule: ApplicationStage[];
+  organic_alternatives: OrganicAlternative[];
+  agronomic_advisory: string[];
+}
+
 

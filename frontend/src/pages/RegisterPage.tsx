@@ -27,7 +27,11 @@ export const RegisterPage: React.FC = () => {
       });
       navigate('/dashboard');
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Registration failed. Email may already be registered.');
+      if (!err.response) {
+        setError('Cannot connect to backend API server (http://localhost:8000). Please start the backend server with: uvicorn app.main:app --port 8000');
+      } else {
+        setError(err.response?.data?.detail || 'Registration failed. Email may already be registered.');
+      }
     } finally {
       setLoading(false);
     }

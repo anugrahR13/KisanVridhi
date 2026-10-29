@@ -11,7 +11,8 @@ interface AuthContextType {
   isAdmin: boolean;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  loginAsDemo: (demoRole: 'farmer' | 'admin') => void;
+  loginAsDemo: (demoRole: 'farmer' | 'admin') => Promise<void>;
+  loginWithToken: (token: string) => Promise<void>;
   register: (data: any) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
@@ -61,13 +62,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await fetchCurrentUser();
   };
 
-  const loginAsDemo = (demoRole: 'farmer' | 'admin') => {
-    const selectedUser = demoRole === 'admin' ? DEMO_ADMIN_USER : DEMO_FARMER_USER;
-    localStorage.setItem('token', 'demo-token');
-    localStorage.setItem('is_demo', 'true');
-    localStorage.setItem('user', JSON.stringify(selectedUser));
-    setToken('demo-token');
-    setUser(selectedUser);
+  const loginWithToken = async (newToken: string) => {
+    localStorage.removeItem('is_demo');
+    localStorage.setItem('token', newToken);
+    setToken(newToken);
+    await fetchCurrentUser();
+  };
+
+  const loginAsDemo = async (demoRole: 'farmer' | 'admin') => {
+    const creds = demoRole === 'admin'
+      ? { email: 'admin@eco.farm', password: 'Admin@123456' }
+      : { email: 'farmer@eco.farm', password: 'Farmer@123456' };
+
+    try {
+      const data = await authService.login(creds.email, creds.password);
+      localStorage.removeItem('is_demo');
+      localStorage.setItem('token', data.access_token);
+      setToken(data.access_token);
+      await fetchCurrentUser();
+    } catch {
+      // Offline fallback: Use client-side demo state
+      const selectedUser = demoRole === 'admin' ? DEMO_ADMIN_USER : DEMO_FARMER_USER;
+      localStorage.setItem('token', 'demo-token');
+      localStorage.setItem('is_demo', 'true');
+      localStorage.setItem('user', JSON.stringify(selectedUser));
+      setToken('demo-token');
+      setUser(selectedUser);
+    }
   };
 
   const register = async (regData: any) => {
@@ -82,6 +103,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('is_demo');
+    localStorage.removeItem('agriquest_token');
     setToken(null);
     setUser(null);
   };
@@ -104,6 +126,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       loading,
       login,
       loginAsDemo,
+      loginWithToken,
       register,
       logout,
       refreshUser

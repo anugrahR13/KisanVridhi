@@ -31,6 +31,7 @@ from app.api.weather import router as weather_router
 from app.api.schemes import router as schemes_router
 from app.api.documents import router as documents_router
 from app.api.market import router as market_router
+from app.api.fertilizer import router as fertilizer_router
 
 # Create database tables automatically
 Base.metadata.create_all(bind=engine)
@@ -86,6 +87,7 @@ app.include_router(weather_router, prefix=settings.API_V1_STR)
 app.include_router(schemes_router, prefix=settings.API_V1_STR)
 app.include_router(documents_router, prefix=settings.API_V1_STR)
 app.include_router(market_router, prefix=settings.API_V1_STR)
+app.include_router(fertilizer_router, prefix=settings.API_V1_STR)
 
 @app.get("/")
 @app.get("/api")

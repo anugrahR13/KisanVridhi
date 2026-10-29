@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { assistantService } from '../services/appServices';
 import { ChatMessage } from '../types';
-import { Bot, Send, BookOpen, Tractor, User, HelpCircle } from 'lucide-react';
+import { Bot, Send, BookOpen, Tractor, User, HelpCircle, Mic } from 'lucide-react';
+import { VoiceAssistantModal } from '../components/voice/VoiceAssistantModal';
 
 export const AIAssistantPage: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -13,6 +14,7 @@ export const AIAssistantPage: React.FC = () => {
 
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [voiceModalOpen, setVoiceModalOpen] = useState(false);
 
   const sampleQuestions = [
     'What should I do today?',
@@ -51,13 +53,22 @@ export const AIAssistantPage: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-5 pb-12">
-      <div className="bg-white border border-slate-200 p-4 sm:p-5 rounded-lg shadow-xs">
-        <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-          <Bot className="w-5 h-5 text-green-700" /> Ask KisanVridhi AI Assistant
-        </h1>
-        <p className="text-xs text-slate-600 mt-1">
-          Grounded agricultural advisor referencing verified ICAR, KVK, and FAO sustainable farming guidance.
-        </p>
+      <div className="bg-white border border-slate-200 p-4 sm:p-5 rounded-lg shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+            <Bot className="w-5 h-5 text-green-700" /> Ask KisanVridhi AI Assistant
+          </h1>
+          <p className="text-xs text-slate-600 mt-1">
+            Grounded agricultural advisor referencing verified ICAR, KVK, and FAO sustainable farming guidance.
+          </p>
+        </div>
+        <button
+          onClick={() => setVoiceModalOpen(true)}
+          className="flex items-center gap-2 px-3.5 py-2 bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-500 hover:to-green-600 text-white rounded-lg text-xs font-bold shadow-sm transition-all self-start sm:self-center shrink-0"
+        >
+          <Mic className="w-4 h-4 text-emerald-100" />
+          <span>🎙️ बोलकर पूछें (Voice Mode)</span>
+        </button>
       </div>
 
       {/* Suggested Quick Prompts */}
@@ -144,6 +155,14 @@ export const AIAssistantPage: React.FC = () => {
             }}
             className="flex items-center space-x-2"
           >
+            <button
+              type="button"
+              onClick={() => setVoiceModalOpen(true)}
+              className="p-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded shadow-xs transition-colors"
+              title="Speak in Hindi/Punjabi/Telugu/Marathi/English"
+            >
+              <Mic className="w-4 h-4 text-emerald-700" />
+            </button>
             <input
               type="text"
               value={input}
@@ -161,6 +180,12 @@ export const AIAssistantPage: React.FC = () => {
           </form>
         </div>
       </div>
+
+      {/* Multilingual Voice Assistant Modal */}
+      <VoiceAssistantModal
+        isOpen={voiceModalOpen}
+        onClose={() => setVoiceModalOpen(false)}
+      />
     </div>
   );
 };

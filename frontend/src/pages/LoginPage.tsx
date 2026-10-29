@@ -17,7 +17,7 @@ export const LoginPage: React.FC = () => {
 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login, loginAsDemo } = useAuth();
+  const { login, loginAsDemo, loginWithToken } = useAuth();
   const navigate = useNavigate();
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
@@ -30,7 +30,7 @@ export const LoginPage: React.FC = () => {
       navigate('/dashboard');
     } catch (err: any) {
       if (!err.response) {
-        setError('Cannot connect to backend API server. If your backend is not yet deployed, use the 1-Click Demo Login below to explore the full platform.');
+        setError('Cannot connect to backend API server (http://localhost:8000). Please start the backend with: uvicorn app.main:app --port 8000, or use 1-Click Demo Login below.');
       } else {
         setError(err.response?.data?.detail || 'Invalid email or password.');
       }
@@ -50,7 +50,11 @@ export const LoginPage: React.FC = () => {
       setOtpSent(true);
       setOtpMessage(`Verification code sent to ${phoneNumber}. Demo OTP code: ${res.demo_otp || '123456'}`);
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to send OTP.');
+      if (!err.response) {
+        setError('Cannot reach backend server. Please verify the backend is running at http://localhost:8000.');
+      } else {
+        setError(err.response?.data?.detail || 'Failed to send OTP.');
+      }
     } finally {
       setLoading(false);
     }
@@ -63,10 +67,14 @@ export const LoginPage: React.FC = () => {
 
     try {
       const res = await authService.verifyOtp(phoneNumber, otpCode);
-      localStorage.setItem('agriquest_token', res.access_token);
-      window.location.href = '/dashboard';
+      await loginWithToken(res.access_token);
+      navigate('/dashboard');
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Invalid OTP verification code.');
+      if (!err.response) {
+        setError('Cannot reach backend server. Please verify the backend is running at http://localhost:8000.');
+      } else {
+        setError(err.response?.data?.detail || 'Invalid OTP verification code.');
+      }
     } finally {
       setLoading(false);
     }
@@ -217,8 +225,8 @@ export const LoginPage: React.FC = () => {
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
-                onClick={() => {
-                  loginAsDemo('farmer');
+                onClick={async () => {
+                  await loginAsDemo('farmer');
                   navigate('/dashboard');
                 }}
                 className="py-2 px-3 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
@@ -228,8 +236,8 @@ export const LoginPage: React.FC = () => {
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  loginAsDemo('admin');
+                onClick={async () => {
+                  await loginAsDemo('admin');
                   navigate('/admin/dashboard');
                 }}
                 className="py-2 px-3 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-300 text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
