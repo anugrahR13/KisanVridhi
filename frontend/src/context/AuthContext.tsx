@@ -11,7 +11,7 @@ interface AuthContextType {
   isAdmin: boolean;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  loginAsDemo: (demoRole: 'farmer' | 'admin') => Promise<void>;
+  loginAsDemo: (demoRole: 'farmer' | 'admin' | 'gurpreet') => Promise<void>;
   loginWithToken: (token: string) => Promise<void>;
   register: (data: any) => Promise<void>;
   logout: () => void;
@@ -69,10 +69,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await fetchCurrentUser();
   };
 
-  const loginAsDemo = async (demoRole: 'farmer' | 'admin') => {
-    const creds = demoRole === 'admin'
-      ? { email: 'admin@eco.farm', password: 'Admin@123456' }
-      : { email: 'farmer@eco.farm', password: 'Farmer@123456' };
+  const loginAsDemo = async (demoRole: 'farmer' | 'admin' | 'gurpreet') => {
+    let creds = { email: 'gurpreet@eco.farm', password: 'Gurpreet@123' };
+    if (demoRole === 'admin') {
+      creds = { email: 'admin@eco.farm', password: '123456' };
+    } else if (demoRole === 'farmer') {
+      creds = { email: 'farmer@eco.farm', password: '123456' };
+    }
 
     try {
       const data = await authService.login(creds.email, creds.password);
@@ -81,13 +84,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setToken(data.access_token);
       await fetchCurrentUser();
     } catch {
-      // Offline fallback: Use client-side demo state
-      const selectedUser = demoRole === 'admin' ? DEMO_ADMIN_USER : DEMO_FARMER_USER;
-      localStorage.setItem('token', 'demo-token');
-      localStorage.setItem('is_demo', 'true');
-      localStorage.setItem('user', JSON.stringify(selectedUser));
-      setToken('demo-token');
-      setUser(selectedUser);
+      // Try with traditional password if custom backend hasn't reloaded yet
+      try {
+        const fallbackPassword = demoRole === 'admin' ? 'Admin@123456' : 'Farmer@123456';
+        const data = await authService.login(creds.email, fallbackPassword);
+        localStorage.removeItem('is_demo');
+        localStorage.setItem('token', data.access_token);
+        setToken(data.access_token);
+        await fetchCurrentUser();
+        return;
+      } catch {
+        // Offline fallback: Use client-side demo state
+        const selectedUser = demoRole === 'admin' ? DEMO_ADMIN_USER : DEMO_FARMER_USER;
+        localStorage.setItem('token', 'demo-token');
+        localStorage.setItem('is_demo', 'true');
+        localStorage.setItem('user', JSON.stringify(selectedUser));
+        setToken('demo-token');
+        setUser(selectedUser);
+      }
     }
   };
 

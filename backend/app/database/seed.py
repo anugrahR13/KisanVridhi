@@ -11,6 +11,295 @@ from app.auth.security import get_password_hash
 from app.services.sustainability_calculator import calculate_sustainability_score
 from app.services.gamification_service import award_xp
 
+
+def seed_gurpreet_profile(db):
+    """Seed comprehensive farmer profile showcasing all implemented features."""
+    gurpreet_email = "gurpreet@eco.farm"
+    existing = db.query(User).filter(User.email == gurpreet_email).first()
+    if existing:
+        return existing
+
+    user = User(
+        email=gurpreet_email,
+        password_hash=get_password_hash("Gurpreet@123"),
+        full_name="Gurpreet Singh",
+        display_name="EcoFarmer Gurpreet",
+        location="Ludhiana, Punjab, India",
+        phone_number="+919876501234",
+        preferred_language="English",
+        role="farmer",
+        xp=1250,
+        level=3,
+        sustainability_score=84.5
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    # 1. Farms (Multi-farm support)
+    f1 = Farm(
+        user_id=user.id,
+        farm_name="Amrit Sarovar Eco Farm",
+        location="Ludhiana, Punjab",
+        area_acres=5.5,
+        soil_type="Loamy",
+        irrigation_type="Drip Irrigation",
+        water_source="Borewell + Rainwater Harvesting",
+        primary_crop="Wheat",
+        secondary_crops="Mustard, Gram, Vegetables",
+        farming_experience="5-10 years",
+        current_practices="Organic Mulching, Green Manuring, Vermicomposting, Drip Scheduling",
+        season="Rabi",
+        sowing_date="2026-11-05",
+        expected_harvest_date="2027-04-15",
+        farming_goals="Zero chemical pesticide runoff, solar micro-irrigation, and 85+ sustainability score."
+    )
+    db.add(f1)
+
+    f2 = Farm(
+        user_id=user.id,
+        farm_name="Shivalik Organic Orchard & Pulses",
+        location="Rupnagar, Punjab",
+        area_acres=2.5,
+        soil_type="Alluvial",
+        irrigation_type="Sprinkler",
+        water_source="Canal + Pond",
+        primary_crop="Kinnow Mandarin",
+        secondary_crops="Chickpea, Moong",
+        farming_experience="10+ years",
+        current_practices="Intercropping, Bio-stimulants, Bio-pesticides",
+        season="Zaid"
+    )
+    db.add(f2)
+    db.commit()
+    db.refresh(f1)
+    db.refresh(f2)
+
+    # 2. Crops
+    db.add(Crop(farm_id=f1.id, crop_name="Wheat", variety="HD-3086", area_acres=3.5, status="active"))
+    db.add(Crop(farm_id=f1.id, crop_name="Mustard", variety="Pusa Bold", area_acres=1.5, status="active"))
+    db.add(Crop(farm_id=f1.id, crop_name="Gram (Chickpea)", variety="Pusa 362", area_acres=0.5, status="active"))
+    db.add(Crop(farm_id=f2.id, crop_name="Kinnow Mandarin", variety="Punjab Kinnow", area_acres=2.0, status="active"))
+    db.add(Crop(farm_id=f2.id, crop_name="Summer Moong", variety="SML-668", area_acres=0.5, status="active"))
+    db.commit()
+
+    # 3. Itemized Expenses
+    expenses = [
+        FarmExpense(user_id=user.id, farm_id=f1.id, category="Seeds", amount=4800.0, expense_date="2026-05-10", description="Certified HD-3086 Wheat Seeds (120kg)"),
+        FarmExpense(user_id=user.id, farm_id=f1.id, category="Fertilizer", amount=7200.0, expense_date="2026-05-22", description="Bio-NPK Consortium & Neem Seed Cake"),
+        FarmExpense(user_id=user.id, farm_id=f1.id, category="Labour", amount=11500.0, expense_date="2026-06-12", description="Laser leveling, bed preparation & precision sowing"),
+        FarmExpense(user_id=user.id, farm_id=f1.id, category="Irrigation", amount=3400.0, expense_date="2026-07-04", description="Sub-surface drip lateral flush & venturi servicing"),
+        FarmExpense(user_id=user.id, farm_id=f1.id, category="Machinery", amount=5500.0, expense_date="2026-07-18", description="Happy Seeder zero-till tractor custom hiring"),
+        FarmExpense(user_id=user.id, farm_id=f1.id, category="Transport", amount=2600.0, expense_date="2026-08-02", description="Produce cartage to Khanna APMC Mandi"),
+        FarmExpense(user_id=user.id, farm_id=f1.id, category="Pesticides", amount=1800.0, expense_date="2026-08-15", description="Trichoderma viride bio-fungicide & Yellow Sticky Traps"),
+    ]
+    for exp in expenses:
+        db.add(exp)
+    db.commit()
+
+    # 4. Profitability Record
+    db.add(ProfitRecord(
+        user_id=user.id,
+        farm_id=f1.id,
+        crop_name="Wheat (HD-3086)",
+        harvest_date="2026-04-20",
+        production_qty_kg=5400.0,
+        selling_price_per_kg=24.8,
+        revenue=133920.0,
+        total_expenses=36800.0,
+        net_profit=97120.0,
+        area_acres=5.5,
+        cost_per_acre=6690.91,
+        revenue_per_acre=24349.09,
+        profit_per_acre=17658.18,
+        break_even_price_per_kg=6.81,
+        notes="Zero chemical synthetic pesticide season; premium grade wheat procurement at Khanna APMC mandi."
+    ))
+    db.commit()
+
+    # 5. Soil Record
+    db.add(SoilRecord(
+        user_id=user.id,
+        farm_id=f1.id,
+        ph=6.9,
+        nitrogen_ppm=172.0,
+        phosphorus_ppm=42.0,
+        potassium_ppm=228.0,
+        organic_carbon_percent=0.78,
+        soil_type="Loamy",
+        moisture_percent=24.5,
+        tested_at="2026-08-10",
+        notes="Official Ludhiana KVK Soil Testing Laboratory. Certified Grade A organic vitality; optimal NPK ratio."
+    ))
+    db.commit()
+
+    # 6. Farm Tasks
+    tasks = [
+        FarmTask(user_id=user.id, farm_id=f1.id, title="Inspect Wheat Lower Leaves for Yellow Rust", description="Walk through 5.5 acre field and inspect foliage using AI Grad-CAM foliar tool.", category="Pest Control", due_date="2026-11-04", priority="high", status="pending", source="AI System"),
+        FarmTask(user_id=user.id, farm_id=f1.id, title="Flush Solar Drip Irrigation Laterals at 2.2 Bar", description="Open flush caps on 8 sub-surface laterals and flush silt accumulated from borewell.", category="Irrigation", due_date="2026-11-06", priority="medium", status="pending", source="Manual"),
+        FarmTask(user_id=user.id, farm_id=f1.id, title="Apply Fermented Jeevamrut Liquid via Venturi Injector", description="Inject 200L of 7-day fermented Jeevamrut during scheduled evening irrigation.", category="Organic Farming", due_date="2026-11-08", priority="medium", status="pending", source="Recommendation"),
+        FarmTask(user_id=user.id, farm_id=f1.id, title="Broadcasting 2nd Split Neem-Coated Urea (Tillering Stage)", description="Apply 1.2 bags (55 kg) urea per acre ahead of light drip watering.", category="Soil Health", due_date="2026-11-12", priority="high", status="pending", source="Optimizer"),
+        FarmTask(user_id=user.id, farm_id=f1.id, title="Installed 15 Yellow Sticky Traps across Mustard rows", description="Deployed sticky cards at canopy height for non-chemical aphid management.", category="Pest Control", due_date="2026-10-24", priority="medium", status="completed", source="Mission"),
+        FarmTask(user_id=user.id, farm_id=f1.id, title="Submitted Composite Soil Core to District KVK Lab", description="Gathered 5 core depth samples across 5.5 acres for certified annual soil test card.", category="Soil Health", due_date="2026-08-08", priority="high", status="completed", source="Manual"),
+        FarmTask(user_id=user.id, farm_id=f1.id, title="Solar Inverter Filter & Cable Maintenance", description="Cleaned air dust mesh on solar drive and checked earthing resistance.", category="Resource Conservation", due_date="2026-10-15", priority="low", status="completed", source="Manual"),
+    ]
+    for t in tasks:
+        db.add(t)
+    db.commit()
+
+    # 7. Document Vault
+    docs = [
+        FarmDocument(user_id=user.id, farm_id=f1.id, title="Official District KVK Soil Health Card 2026", category="Soil Report", file_path="/uploads/documents/soil_health_card_2026.pdf", file_type="application/pdf", file_size_bytes=245000),
+        FarmDocument(user_id=user.id, farm_id=f1.id, title="PMKSY Drip Irrigation Subsidy Sanction Certificate", category="Scheme Doc", file_path="/uploads/documents/pmksy_drip_subsidy.pdf", file_type="application/pdf", file_size_bytes=412000),
+        FarmDocument(user_id=user.id, farm_id=f1.id, title="Certified HD-3086 Organic Wheat Seed Purchase Bill", category="Bill/Receipt", file_path="/uploads/documents/seed_invoice_hd2967.pdf", file_type="application/pdf", file_size_bytes=185000),
+        FarmDocument(user_id=user.id, farm_id=f1.id, title="Punjab Land Revenue Record Form 7/12 Attestation", category="Certificate", file_path="/uploads/documents/kcc_land_record_attestation.pdf", file_type="application/pdf", file_size_bytes=320000),
+        FarmDocument(user_id=user.id, farm_id=f1.id, title="Pradhan Mantri Fasal Bima Yojana (PMFBY) Crop Policy", category="Insurance", file_path="/uploads/documents/soil_health_card_2026.pdf", file_type="application/pdf", file_size_bytes=198000),
+    ]
+    for doc in docs:
+        db.add(doc)
+    db.commit()
+
+    # 8. Disease Diagnoses
+    db.add(DiseaseDiagnosis(
+        user_id=user.id,
+        farm_id=f1.id,
+        crop_detected="Wheat",
+        disease_name="Wheat Yellow Rust (Puccinia striiformis)",
+        confidence_score=0.946,
+        severity="Moderate",
+        organic_treatment="Spray 5% Neem Seed Kernel Extract (NSKE) or fermented sour buttermilk (1:10 ratio) every 7 days.",
+        chemical_treatment="Propiconazole 25% EC @ 1ml/L water or Tebuconazole 25.9% EC @ 1ml/L water.",
+        preventive_measure="Adopt early sowing, avoid excess nitrogen fertilizer, use resistant varieties like HD-3086 or PBW-725.",
+        recommended_quest="Implement Organic Foliar Spray Quest",
+        image_url="/uploads/disease/crop_diag_4_1752.jpg"
+    ))
+    db.add(DiseaseDiagnosis(
+        user_id=user.id,
+        farm_id=f1.id,
+        crop_detected="Tomato",
+        disease_name="Early Blight (Alternaria solani)",
+        confidence_score=0.918,
+        severity="Low",
+        organic_treatment="Spray Trichoderma viride bio-fungicide (5g/L water) or fermented Jeevamrut extract. Remove affected lower leaves.",
+        chemical_treatment="Mancozeb 75% WP (2g/L) or Copper Oxychloride 50% WP (3g/L) at first sign of concentric ring spots.",
+        preventive_measure="Implement drip irrigation to keep foliage dry, mulch ground with straw, and practice 3-year crop rotation.",
+        recommended_quest="Apply Organic Bio-Fungicide & Mulching",
+        image_url="/uploads/user_4_1793129623_12030885-rice-plant.jpg"
+    ))
+    db.commit()
+
+    # 9. Badges
+    badges = db.query(Badge).all()
+    for b in badges[:5]:
+        db.add(UserBadge(user_id=user.id, badge_id=b.id))
+    db.commit()
+
+    # 10. Missions
+    missions = db.query(Mission).all()
+    if len(missions) >= 2:
+        mp1 = MissionProgress(
+            user_id=user.id,
+            farm_id=f1.id,
+            mission_id=missions[0].id,
+            status="completed",
+            image_url="/uploads/dd571976eaca4f13b8f3df03ff5087d4.jpg",
+            started_at=datetime.utcnow() - timedelta(days=14),
+            completed_at=datetime.utcnow() - timedelta(days=4)
+        )
+        db.add(mp1)
+        db.commit()
+        db.refresh(mp1)
+
+        db.add(ImageVerification(
+            mission_progress_id=mp1.id,
+            user_id=user.id,
+            image_path="/uploads/dd571976eaca4f13b8f3df03ff5087d4.jpg",
+            verification_status="approved",
+            detected_practice=missions[0].expected_practice_label or "Drip Irrigation Installation",
+            confidence_score=0.965,
+            review_notes="Verified by District Agriculture Extension Officer. Drip system properly installed with venturi filter."
+        ))
+
+        mp2 = MissionProgress(
+            user_id=user.id,
+            farm_id=f1.id,
+            mission_id=missions[1].id,
+            status="completed",
+            image_url="/uploads/disease/crop_diag_4_1752.jpg",
+            started_at=datetime.utcnow() - timedelta(days=10),
+            completed_at=datetime.utcnow() - timedelta(days=2)
+        )
+        db.add(mp2)
+        db.commit()
+        db.refresh(mp2)
+
+        db.add(ImageVerification(
+            mission_progress_id=mp2.id,
+            user_id=user.id,
+            image_path="/uploads/disease/crop_diag_4_1752.jpg",
+            verification_status="approved",
+            detected_practice=missions[1].expected_practice_label or "Organic Mulching Practice",
+            confidence_score=0.948,
+            review_notes="3 inches organic crop residue mulching verified across crop rows."
+        ))
+
+        if len(missions) >= 3:
+            db.add(MissionProgress(
+                user_id=user.id,
+                farm_id=f1.id,
+                mission_id=missions[2].id,
+                status="started",
+                image_url=None,
+                started_at=datetime.utcnow() - timedelta(days=1)
+            ))
+        db.commit()
+
+    # 11. Reward Redemption
+    reward = db.query(RewardItem).first()
+    if reward:
+        db.add(UserRewardRedemption(
+            user_id=user.id,
+            reward_id=reward.id,
+            voucher_code="KV-ECO8920-GURPREET",
+            points_spent=reward.points_cost,
+            status="Active",
+            redeemed_at=datetime.utcnow() - timedelta(days=2)
+        ))
+        db.commit()
+
+    # 12. Community Post
+    db.add(CommunityPost(
+        user_id=user.id,
+        author_name="Gurpreet Singh",
+        author_level=3,
+        title="50% Water Savings using Sub-Surface Drip & Straw Mulch in Ludhiana",
+        content="Sharing field results from our 5.5-acre wheat and mustard plot. By combining straw mulching with Open-Meteo weather-guided irrigation, we skipped 3 unnecessary watering rounds this month. Soil moisture held steady at 24.5%.",
+        category="Water Conservation",
+        upvotes=28
+    ))
+    db.commit()
+
+    # 13. AI Recommendations
+    from app.ai.recommendation_engine import SustainabilityRecommendationEngine
+    recs = SustainabilityRecommendationEngine.generate_recommendations_for_farm(f1, user, db)
+    for rec in recs:
+        db.add(Recommendation(
+            user_id=user.id,
+            farm_id=f1.id,
+            category_id=rec["category_id"],
+            title=rec["title"],
+            description=rec["description"],
+            reason=rec["reason"],
+            priority=rec["priority"],
+            estimated_impact=rec["estimated_impact"],
+            difficulty=rec["difficulty"],
+            related_mission_id=rec["related_mission_id"]
+        ))
+    db.commit()
+
+    print("[SUCCESS] Gurpreet Singh full features profile seeded successfully!")
+    return user
+
 def seed_database():
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
@@ -682,6 +971,7 @@ def seed_database():
             db.commit()
             print("[SUCCESS] Mandi Market Prices seeded!")
 
+        seed_gurpreet_profile(db)
         print("[SUCCESS] Seed completed successfully!")
 
     except Exception as e:

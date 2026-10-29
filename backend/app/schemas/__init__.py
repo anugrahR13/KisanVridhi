@@ -13,7 +13,7 @@ class UserRegister(BaseModel):
     preferred_language: Optional[str] = "English"
 
 class UserLogin(BaseModel):
-    email: EmailStr
+    email: str
     password: str
 
 class OTPRequest(BaseModel):

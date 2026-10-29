@@ -19,8 +19,10 @@ echo   Frontend App:    http://localhost:5173
 echo   Backend API Doc: http://localhost:8000/docs
 echo.
 echo   Demo Login Credentials:
-echo   - Farmer: farmer@eco.farm / Farmer@123456
-echo   - Admin:  admin@eco.farm  / Admin@123456
+echo   - Full Features: gurpreet@eco.farm / Gurpreet@123 (or 123456)
+echo   - Phone OTP:     +91 98765 01234   (OTP: 123456)
+echo   - Farmer Demo:   farmer@eco.farm   / Farmer@123456
+echo   - Admin Demo:    admin@eco.farm    / Admin@123456
 echo ===================================================
 echo.
 pause

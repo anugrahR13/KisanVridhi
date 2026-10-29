@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/appServices';
-import { Sprout, LogIn, Phone, KeyRound, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Sprout, LogIn, Phone, KeyRound, AlertCircle, CheckCircle2, Sparkles } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
   const [authMethod, setAuthMethod] = useState<'password' | 'otp'>('password');
@@ -32,7 +32,14 @@ export const LoginPage: React.FC = () => {
       if (!err.response) {
         setError('Cannot connect to backend API server (http://localhost:8000). Please start the backend with: uvicorn app.main:app --port 8000, or use 1-Click Demo Login below.');
       } else {
-        setError(err.response?.data?.detail || 'Invalid email or password.');
+        const detail = err.response?.data?.detail;
+        if (typeof detail === 'string') {
+          setError(detail);
+        } else if (Array.isArray(detail) && detail.length > 0) {
+          setError(detail[0]?.msg || 'Invalid email or password.');
+        } else {
+          setError('Invalid email or password.');
+        }
       }
     } finally {
       setLoading(false);
@@ -222,29 +229,42 @@ export const LoginPage: React.FC = () => {
         <div className="pt-2 text-center space-y-3 border-t border-slate-100">
           <div className="space-y-1.5">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Instant Live Preview</span>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-2">
               <button
                 type="button"
                 onClick={async () => {
-                  await loginAsDemo('farmer');
+                  await loginAsDemo('gurpreet');
                   navigate('/dashboard');
                 }}
-                className="py-2 px-3 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                className="w-full py-2.5 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer"
               >
-                <Sprout className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Demo Farmer</span>
+                <Sparkles className="w-4 h-4 text-emerald-200" />
+                <span>⭐ 1-Click Login: Full Features Profile (Gurpreet Singh)</span>
               </button>
-              <button
-                type="button"
-                onClick={async () => {
-                  await loginAsDemo('admin');
-                  navigate('/admin/dashboard');
-                }}
-                className="py-2 px-3 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-300 text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
-              >
-                <KeyRound className="w-3.5 h-3.5 text-purple-600" />
-                <span>Demo Admin</span>
-              </button>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await loginAsDemo('farmer');
+                    navigate('/dashboard');
+                  }}
+                  className="py-2 px-3 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <Sprout className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Demo Farmer</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await loginAsDemo('admin');
+                    navigate('/admin/dashboard');
+                  }}
+                  className="py-2 px-3 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-300 text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <KeyRound className="w-3.5 h-3.5 text-purple-600" />
+                  <span>Demo Admin</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -254,9 +274,19 @@ export const LoginPage: React.FC = () => {
               Register Here
             </Link>
           </p>
-          <div className="p-2.5 rounded bg-slate-50 border border-slate-200 text-[11px] text-slate-600 font-medium space-y-0.5 text-left">
-            <p><strong>Demo Farmer:</strong> farmer@eco.farm / Farmer@123456</p>
-            <p><strong>Demo Admin:</strong> admin@eco.farm / Admin@123456</p>
+          <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-slate-700 font-medium space-y-1 text-left">
+            <p className="font-bold text-emerald-900 flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-emerald-700" />
+              <span>Full Features Profile (Gurpreet Singh):</span>
+            </p>
+            <div className="grid grid-cols-1 gap-1 text-[11px] text-slate-700 mt-1 pl-1">
+              <p><strong>Email:</strong> <code className="bg-white px-1.5 py-0.5 rounded border border-emerald-200 text-emerald-800 font-bold">gurpreet@eco.farm</code></p>
+              <p><strong>Password:</strong> <code className="bg-white px-1.5 py-0.5 rounded border border-emerald-200 text-emerald-800 font-bold">Gurpreet@123</code> <span className="text-slate-500">(or 123456)</span></p>
+              <p><strong>Phone OTP:</strong> <code className="bg-white px-1.5 py-0.5 rounded border border-emerald-200 text-emerald-800 font-bold">+91 98765 01234</code> (Code: 123456)</p>
+            </div>
+          </div>
+          <div className="p-2 rounded bg-slate-50 border border-slate-200 text-[11px] text-slate-600 font-medium space-y-0.5 text-left">
+            <p><strong>Other Demo Profiles:</strong> farmer@eco.farm / Farmer@123456 • admin@eco.farm / Admin@123456</p>
           </div>
         </div>
       </div>

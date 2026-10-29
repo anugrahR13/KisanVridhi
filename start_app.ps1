@@ -20,6 +20,8 @@ Write-Host "  Frontend Web App: http://localhost:5173" -ForegroundColor Yellow
 Write-Host "  Backend API Docs: http://localhost:8000/docs" -ForegroundColor Yellow
 Write-Host ""
 Write-Host "  Demo Credentials:" -ForegroundColor White
-Write-Host "  - Farmer: farmer@eco.farm / Farmer@123456"
-Write-Host "  - Admin:  admin@eco.farm  / Admin@123456"
+Write-Host "  - Full Features Profile: gurpreet@eco.farm / Gurpreet@123 (or 123456)" -ForegroundColor Green
+Write-Host "  - Phone OTP Sign In:     +91 98765 01234 (OTP: 123456)" -ForegroundColor Green
+Write-Host "  - Farmer Demo:           farmer@eco.farm   / Farmer@123456"
+Write-Host "  - Admin Demo:            admin@eco.farm    / Admin@123456"
 Write-Host "===================================================" -ForegroundColor Green
